@@ -222,6 +222,8 @@ customAxios.interceptors.response.use(function (response) {
         return Promise.reject(null);
     }
     // For HTTP 404 without envelope (e.g. open-source license API), show a generic message
+    // Silent mode: skip toast, let the caller handle it
+    if (error.config?.silent) return Promise.reject(error);
     const status = error.response?.status
     if (status === 404) {
         toast({
