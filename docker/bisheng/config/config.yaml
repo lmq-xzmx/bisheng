@@ -23,7 +23,7 @@ database_pool:
 # 缓存配置  redis://[[username]:[password]]@localhost:6379/0
 # 如果设置了密码，需要参考MySQL密码的加密逻辑对密码进行加密。eg: redis://root:gAAAAABlp4b4c59FeVGF_OQRVf6NOUIGdxq8246EBD-b0hdK_jVKRs1x4PoAn0A6C5S6IiFKmWn0Nm5eBUWu-7jxcqw6TiVjQA==@redis:6379/0
 # 普通模式:
-redis_url: "redis://redis:6379/1"
+redis_url: "redis://default:gAAAAABqbL_Ul8JkNAo05au9u4rhJA6QjksHeEmDJllf1ETGHkjoHZRoSXdaZ5FK4CyOEY0mohbrglR7wAUa7YDuTDIsvI1v9A==@redis:6379/1"
 
 # 与 docker-compose 中 openfga 服务对应（容器内网络）
 openfga:
@@ -50,7 +50,7 @@ sso_sync:
 
 # Celery broker Redis 配置
 # 单点模式（兼容现有写法）:
-celery_redis_url: "redis://redis:6379/2"
+celery_redis_url: "redis://default:gAAAAABqbL_Ul8JkNAo05au9u4rhJA6QjksHeEmDJllf1ETGHkjoHZRoSXdaZ5FK4CyOEY0mohbrglR7wAUa7YDuTDIsvI1v9A==@redis:6379/2"
 # 哨兵模式:
 # celery_redis_url:
 #   mode: "sentinel"
@@ -120,13 +120,13 @@ object_storage:
     tmp_bucket: 'tmp-dir'  # 临时bucket，会对传到此bucket内的文件设置有效期
 
 environment:
-  env: dev
+  env: production
   uns_support: ['png','jpg','jpeg','bmp','doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'md', 'html', 'pdf', 'csv', 'tiff']
 
 # 可根据loguru的文档配置不同 handlers
 logger_conf:
   # 默认输出到sys.stdout的日志级别, 大于等于此级别都会输出
-  level: DEBUG
+  level: INFO
   # 默认输出格式
   format: '<level>[{time:YYYY-MM-DD HH:mm:ss.SSSSSS}] [{level.name} process-{process.id}-{thread.id} {name}:{line}]</level> - <level>trace={extra[trace_id]} {message}</level>'
   # 参考loguru.add()中的参数可以配置多个handler

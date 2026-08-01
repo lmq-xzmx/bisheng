@@ -18,7 +18,7 @@ services:
       interval: 20s
       timeout: 10s
       retries: 4
-    restart: on-failure
+    restart: unless-stopped
 
   openfga-migrate:
     container_name: bisheng-openfga-migrate
@@ -65,7 +65,7 @@ services:
     container_name: bisheng-redis
     image: redis:7.0.4
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     environment:
       TZ: Asia/Shanghai
     volumes:
@@ -77,7 +77,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    restart: on-failure
+    restart: unless-stopped
 
   backend:
     container_name: bisheng-backend
@@ -105,7 +105,7 @@ services:
     security_opt:
       - seccomp:unconfined
     command: sh entrypoint.sh api  # 启动api服务
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
       start_period: 30s
@@ -145,7 +145,7 @@ services:
     security_opt:
       - seccomp:unconfined
     command: sh entrypoint.sh worker  # 启动celery的异步worker服务，用来处理一些耗时的任务
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
@@ -164,7 +164,7 @@ services:
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ${DOCKER_VOLUME_DIRECTORY:-.}/nginx/conf.d:/etc/nginx/conf.d
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       - backend
 
@@ -179,7 +179,7 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/data/es:/bitnami/elasticsearch/data
-    restart: on-failure
+    restart: unless-stopped
 
   etcd:
     container_name: bisheng-milvus-etcd
@@ -193,7 +193,7 @@ services:
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/data/milvus-etcd:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "etcdctl", "endpoint", "health"]
       interval: 30s
@@ -213,7 +213,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_VOLUME_DIRECTORY:-.}/data/milvus-minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -232,7 +232,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_VOLUME_DIRECTORY:-.}/data/milvus:/var/lib/milvus
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
       start_period: 90s

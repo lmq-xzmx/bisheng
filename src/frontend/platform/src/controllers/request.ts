@@ -221,6 +221,16 @@ customAxios.interceptors.response.use(function (response) {
         })
         return Promise.reject(null);
     }
+    // For HTTP 404 without envelope (e.g. open-source license API), show a generic message
+    const status = error.response?.status
+    if (status === 404) {
+        toast({
+            title: `${i18next.t('prompt')}`,
+            variant: 'error',
+            description: i18next.t('errors.404', { defaultValue: '服务器错误' })
+        })
+        return Promise.reject(null);
+    }
     // app 弹窗
     toast({
         title: `${i18next.t('prompt')}`,
