@@ -3,20 +3,27 @@ import { userContext } from "@/contexts/userContext";
 import { ScopeBar } from "@/pages/ModelPage/manage/ScopeBar";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { AppCenter } from "./AppCenter";
 import Index from "./index";
 import Subscribe from "./Subscribe";
 import KnowledgeSpace from "./KnowledgeSpace";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/bs-ui/tabs";
+import { Button } from "@/components/bs-ui/button";
 
 export default function DialogueWork() {
   const [defaultValue] = useState("client");
   const [scopeVersion, setScopeVersion] = useState(0);
   const { t, i18n } = useTranslation();
   const { user } = useContext(userContext) as any;
+  const navigate = useNavigate();
   useEffect(() => {
     i18n.loadNamespaces('tool');
   }, [i18n]);
+
+  const handleOpenCollaborativeChat = () => {
+    window.open('/workspace/collab/sessions', '_blank');
+  };
 
   return (
     <div className="w-full h-full px-2 pt-4 relative">
@@ -39,6 +46,17 @@ export default function DialogueWork() {
             <TabsTrigger value="subscribe">{t('bench.subscribe')}</TabsTrigger>
             <TabsTrigger value="appCenter">{t('bench.appCenter')}</TabsTrigger>
           </TabsList>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenCollaborativeChat}
+            className="ml-auto flex items-center gap-1.5"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {t('bench.collaborativeChat') || '协同聊天'}
+          </Button>
         </div>
         <TabsContent value="client" key="client-tab">
           <Index scopeVersion={scopeVersion} />
