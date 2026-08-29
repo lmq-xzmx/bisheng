@@ -127,6 +127,57 @@ For more installation and deployment issues, refer to:：[Self-hosting](https://
 当前准确时间是{cur_date}。如果用户问今天的日期、天气、新闻，必须立即使用联网搜索获取最新数据，绝不能用自己。
 ```
 
+### AI 联网搜索返回空结果时编造答案（幻觉）
+**症状**：联网搜索返回 0 条结果时，AI 仍然回答了内容（可能是编造的）
+
+**原因**：搜索返回空 → LLM 被迫自己编造答案
+
+**解决**：在 System prompt 中加入约束：
+```
+如果联网搜索返回空结果，必须如实告诉用户"搜索没有找到相关内容"，绝不能编造。
+```
+
+### 联网搜索垂直领域内容覆盖不足
+**症状**：某些领域（娱乐八卦、小众新闻、特定行业）的搜索返回 0 结果
+
+**原因**：SearXNG 的上游引擎（presearch/baidu）对这些垂直领域索引不充分
+
+**解决**：增加垂直领域覆盖的三种方案：
+
+**方案 1：自建垂直索引（推荐）**
+```python
+# 在 Search API 中增加 Meilisearch 垂直索引
+# 将爬取的垂直领域数据直接写入 Meilisearch
+# 查询时优先从 Meilisearch 返回结果
+```
+
+**方案 2：接入垂直搜索 API**
+```python
+# 接入微博热搜、知乎热榜、抖音热榜等垂直 API
+# 将结果统一格式后返回
+# 示例：微博热搜 API、百度指数等
+```
+
+**方案 3：定时爬虫 + Meilisearch**
+```bash
+# 定时爬取目标垂直领域内容
+0 */6 * * * /爬虫脚本/weibo_hot.py --import-to meilisearch
+# Meilisearch 配置垂直领域索引
+curl -X POST 'http://localhost:7700/indexes/entertainment/documents' \
+  -H 'Authorization: Bearer YOUR_KEY' \
+  --data-binary @weibo_hot.json
+```
+
+**具体可增加的垂直领域**：
+
+| 领域 | 数据来源 | 价值 |
+|------|----------|------|
+| 娱乐八卦 | 微博热搜、知乎、抖音 | 高 |
+| 财经股票 | 东方财富、同花顺 | 高 |
+| 体育赛事 | 虎扑、懂球帝 | 中 |
+| 游戏电竞 | 微博游戏热搜、Steam | 中 |
+| 科技数码 | IT之家、少数派 | 中 |
+
 ###Workbox Service Worker 报 "non-precached-url"
 **症状**：浏览器控制台出现 `non-precached-url: non-precached-url :: [{"url":"index.html"}]`
 
