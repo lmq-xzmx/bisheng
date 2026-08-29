@@ -526,6 +526,11 @@ class WorkStationService(BaseService):
             return None
         raw = json.loads(config.value)
 
+        # Backward-compat: frontend saves as "system_prompt" (underscore) but
+        # Pydantic model expects "systemPrompt" (camelCase). Normalize both here.
+        if raw.get("system_prompt") and not raw.get("systemPrompt"):
+            raw["systemPrompt"] = raw["system_prompt"]
+
         # Rollout from beta1 flat-leaf shape -> hierarchical LinSight shape:
         # flat entries carry `tool_key`; group them under their parent type_id
         # so Pydantic can load them into the new schema without data loss.
@@ -1099,8 +1104,7 @@ class WorkStationService(BaseService):
                 org_kb_ids = permitted_org_ids
 
             vectorstore_targets = [(kb_id, False) for kb_id in org_kb_ids] + [
-                (int(kb_id), True)
-                for kb_id in visibility_filter["space_kb_ids"]
+                (int(kb_id), True) for kb_id in visibility_filter["space_kb_ids"]
             ]
 
             knowledge_vector_list = {}
