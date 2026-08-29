@@ -170,13 +170,62 @@ curl -X POST 'http://localhost:7700/indexes/entertainment/documents' \
 
 **具体可增加的垂直领域**：
 
-| 领域 | 数据来源 | 价值 |
-|------|----------|------|
-| 娱乐八卦 | 微博热搜、知乎、抖音 | 高 |
-| 财经股票 | 东方财富、同花顺 | 高 |
-| 体育赛事 | 虎扑、懂球帝 | 中 |
-| 游戏电竞 | 微博游戏热搜、Steam | 中 |
-| 科技数码 | IT之家、少数派 | 中 |
+| 领域 | 数据来源 | 价值 | 状态 |
+|------|----------|------|------|
+| 娱乐八卦 | 微博热搜、知乎、抖音 | 高 | ✅ 已实现 |
+| 财经股票 | 东方财富、同花顺 | 高 | ⏳ 待接入 |
+| 体育赛事 | 虎扑、懂球帝 | 中 | ⏳ 待接入 |
+| 游戏电竞 | 微博游戏热搜、Steam | 中 | ⏳ 待接入 |
+| 科技数码 | IT之家、少数派 | 中 | ⏳ 待接入 |
+
+**Week 1：微博热搜接入** ✅ 已完成
+
+实现位置：`SearXNG+Meilisearch/search-api/main.py` 的 `query_weibo_hot()` 函数。
+调用参数：`?sources=weibo` 或 `?sources=both`。
+
+**Week 2：知乎热榜接入 + Search API 集成** ⏳ 待实现
+
+1. **知乎热榜 API**（无需认证）
+```python
+async def query_zhihu_hot(limit: int = 10) -> list[SearchResult]:
+    resp = await http_client.get(
+        "https://api.zhihu.com/top-aggregate/v1/hot-list",
+        timeout=10.0,
+        headers={"User-Agent": "Mozilla/5.0"}
+    )
+```
+
+2. **Search API 并行查询所有垂直源**
+```python
+tasks = []
+if sources in ("both", "searxng"):
+    tasks.append(query_searxng(q, limit))
+if sources in ("both", "meilisearch"):
+    tasks.append(query_meilisearch(q, limit))
+if sources in ("both", "weibo"):
+    tasks.append(query_weibo_hot(limit))
+if sources in ("both", "zhihu"):
+    tasks.append(query_zhihu_hot(limit))
+```
+
+**Week 3：财经新闻 RSS + 定时任务** ⏳ 待实现
+
+1. **RSS 源接入**（东方财富、新浪财经）
+```python
+async def query_finance_rss(limit: int = 10) -> list[SearchResult]:
+    feeds = [
+        "https://feed.eastmoney.com/news.html",
+        "https://feed.cnbeta.com/"
+    ]
+```
+
+2. **定时任务**（crontab）
+```bash
+# 每小时更新知乎热榜
+0 * * * * python3 /opt/crawlers/zhihu_hot.py >> /var/log/zhihu_hot.log 2>&1
+# 每 30 分钟更新财经 RSS
+*/30 * * * * python3 /opt/crawlers/finance_rss.py >> /var/log/finance_rss.log 2>&1
+```
 
 ###Workbox Service Worker 报 "non-precached-url"
 **症状**：浏览器控制台出现 `non-precached-url: non-precached-url :: [{"url":"index.html"}]`
