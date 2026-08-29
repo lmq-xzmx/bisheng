@@ -85,6 +85,61 @@ By default, the first registered user will become the system admin.
 
 For more installation and deployment issues, refer to:：[Self-hosting](https://dataelem.feishu.cn/wiki/BSCcwKd4Yiot3IkOEC8cxGW7nPc)
 
+## Troubleshooting
+
+###联网搜索 (Web Search) 返回空结果
+**症状**：SearXNG 引擎 Brave/DuckDuckGo 报 `Suspended: too many requests` 或 `CAPTCHA`
+
+**原因**：上游引擎免费配额耗尽或被限制
+
+**解决**：修改 `search-api/main.py` 中的引擎配置，换用可用引擎：
+```python
+"engines": "presearch,baidu"
+```
+然后重建并部署 Search API 容器。
+
+###联网搜索返回 "服务器错误"
+**症状**：BiSheng 聊天界面报 "服务器错误"
+
+**原因 1**：MiniMax API URL 路径错误
+- 错误：`https://api.minimaxi.com/anthropic`
+- 正确：`https://api.minimaxi.com/v1`
+
+**原因 2**：SearXNG 服务器地址配置错误
+- 前端配置地址应为：`http://search-api:8080`（无末尾斜杠）
+- 不要用 `http://localhost:9090`（容器内 localhost 指向容器自己）
+
+**原因 3**：数据库 system_prompt 字段名不匹配
+- 数据库存的是 `system_prompt`（下划线）
+- 代码读取的是 `systemPrompt`（驼峰）
+- 已在 `workstation_service.py` 的 `parse_config()` 中添加自动兼容逻辑
+
+###AI 回答日期总是旧日期
+**症状**：AI 回答 "今天是 X 月 X 日" 总是错误的旧日期
+
+**原因**：System prompt 中的 `{cur_date}` 占位符未被正确替换
+
+**解决**：
+1. 确保数据库 `config` 表的 `workstation` key 中有 `systemPrompt` 字段
+2. System prompt 中必须包含 `{cur_date}` 占位符
+3. 参考配置示例：
+```
+当前准确时间是{cur_date}。如果用户问今天的日期、天气、新闻，必须立即使用联网搜索获取最新数据，绝不能用自己。
+```
+
+###Workbox Service Worker 报 "non-precached-url"
+**症状**：浏览器控制台出现 `non-precached-url: non-precached-url :: [{"url":"index.html"}]`
+
+**解决**：在 Nginx 配置中添加禁止缓存头：
+```nginx
+location ~* /sw\.js$ {
+    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+}
+location ~* /workbox-.*\.js$ {
+    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+}
+```
+
 ## Acknowledgement 
 This repo benefits from [langchain](https://github.com/langchain-ai/langchain) [langflow](https://github.com/logspace-ai/langflow) [unstructured](https://github.com/Unstructured-IO/unstructured) and [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) . Thanks for their wonderful works.
 
