@@ -56,6 +56,7 @@ from bisheng.role.api.router import router as role_router
 from bisheng.sensitive_word.api.router import router as sensitive_word_policy_router
 from bisheng.share_link.api.router import router as share_link_router
 from bisheng.sso_sync.api.router import router as sso_sync_router
+from bisheng.user_sync.api.router import router as user_sync_router
 from bisheng.telemetry_search.api.router import router as telemetry_search_router
 from bisheng.tenant.api.router import router as tenant_router
 from bisheng.user_group.api.router import router as user_group_router
