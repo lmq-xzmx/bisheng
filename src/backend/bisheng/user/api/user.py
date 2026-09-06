@@ -15,7 +15,7 @@ from loguru import logger
 from sqlmodel import col, select
 
 from bisheng.api.services.audit_log import AuditLogService
-from bisheng.api.v1.schemas import CreateUserReq, resp_200
+from bisheng.api.v1.schemas import CreateUserReq, resp_200, resp_500
 from bisheng.common.errcode.http_error import NotFoundError, UnAuthorizedError
 from bisheng.common.errcode.user import UserForbiddenError, UserNotPasswordError, UserPasswordError, UserValidateError
 from bisheng.common.services.config_service import settings
@@ -274,6 +274,74 @@ async def logout(auth_jwt: AuthJwt = Depends()):
         logger.debug("logout scope clear skipped: %s", exc)
     auth_jwt.unset_access_token()
     return resp_200()
+
+
+@router.post("/user/magic-link/request")
+async def request_magic_link(
+    email: str = Query(..., description="Email address to send magic link"),
+):
+    """
+    Request a magic link without being logged in.
+
+    Looks up user by email and sends magic link.
+    """
+    from bisheng.user.api.magic_link import request_magic_link as send_magic_link
+
+    return await send_magic_link(email=email)
+
+
+@router.post("/user/magic-link/send")
+async def send_magic_link_api(
+    email: str = Query(..., description="Email address to send magic link"),
+    login_user: LoginUser = Depends(LoginUser.get_login_user),
+):
+    """Send a magic link to the user's email (requires login)."""
+    from bisheng.user.api.magic_link import send_magic_link as do_send_magic_link
+
+    result = await do_send_magic_link(
+        email=email,
+        user_id=login_user.user_id,
+        user_email=login_user.email,
+    )
+    if "error" in result:
+        return resp_500(500, result["error"])
+    return resp_200(result)
+
+
+@router.get("/user/magic-link/verify")
+async def verify_magic_link_api(
+    token: str = Query(..., description="Magic link token"),
+):
+    """Verify a magic link token and return JWT."""
+    from bisheng.database.models.tenant import UserTenantDao
+    from bisheng.database.models.user import UserDao
+    from bisheng.user.api.magic_link import verify_magic_link as do_verify_magic_link
+    from bisheng.user.domain.services.auth import AuthJwt
+
+    result = await do_verify_magic_link(token=token)
+    if "error" in result:
+        return resp_500(404, result["error"])
+
+    user = result["user"]
+    token_version = await UserDao.aget_token_version(user.user_id)
+    leaf_tenant = await UserTenantDao.aget_user_primary_tenant(user.user_id)
+    tenant_id = leaf_tenant.tenant_id if leaf_tenant else 1
+
+    auth_jwt = AuthJwt()
+    access_token = AuthJwt.create_access_token(
+        user,
+        auth_jwt,
+        tenant_id=tenant_id,
+        token_version=token_version,
+    )
+
+    return resp_200({
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user.user_id,
+        "user_name": user.user_name,
+        "email": user.email,
+    })
 
 
 async def _department_admin_scoped_user_ids(user_id: int) -> list[int] | None:
