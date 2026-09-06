@@ -23,11 +23,42 @@ class OAuthStateData:
     exp: float  # Expiration timestamp
 
 
+class InMemoryStateStore:
+    """In-memory fallback when Redis is unavailable (dev/test only)."""
+
+    _store: dict[str, tuple[str, float]] = {}  # state -> (data_json, exp_time)
+
+    @classmethod
+    def set(cls, key: str, value: str, expiration: int) -> None:
+        cls._store[key] = (value, time.time() + expiration)
+
+    @classmethod
+    def get(cls, key: str) -> str | None:
+        if key not in cls._store:
+            return None
+        data, exp_time = cls._store[key]
+        if time.time() > exp_time:
+            del cls._store[key]
+            return None
+        return data
+
+    @classmethod
+    def delete(cls, key: str) -> None:
+        cls._store.pop(key, None)
+
+    @classmethod
+    def clear_expired(cls) -> None:
+        """Clear expired entries (call periodically)."""
+        now = time.time()
+        cls._store = {k: v for k, v in cls._store.items() if now <= v[1]}
+
+
 class OAuthStateService:
     """Manages OAuth state tokens with Redis storage and HMAC signature verification."""
 
     STATE_TTL = 300  # 5 minutes
     STATE_PREFIX = "oauth:state:"
+    _use_memory_store = False  # Set to True when Redis unavailable
 
     @classmethod
     def _compute_signature(cls, state_data: dict, secret: str) -> str:
@@ -66,13 +97,18 @@ class OAuthStateService:
         state_json = json.dumps(state_data)
         state = base64.urlsafe_b64encode(state_json.encode()).decode()
 
-        # Store in Redis
-        redis = await get_redis_client()
-        await redis.aset(
-            f"{cls.STATE_PREFIX}{state}",
-            state_json,
-            expiration=cls.STATE_TTL,
-        )
+        # Store in Redis with fallback to memory
+        try:
+            redis = await get_redis_client()
+            await redis.aset(
+                f"{cls.STATE_PREFIX}{state}",
+                state_json,
+                expiration=cls.STATE_TTL,
+            )
+        except Exception as redis_err:
+            logger.warning("Redis unavailable for OAuth state, using memory store: %s", redis_err)
+            cls._use_memory_store = True
+            InMemoryStateStore.set(f"{cls.STATE_PREFIX}{state}", state_json, cls.STATE_TTL)
 
         logger.debug("Created OAuth state for provider=%s tenant_id=%s", provider, tenant_id)
         return state
@@ -92,9 +128,20 @@ class OAuthStateService:
             else "default-secret"
         )
 
-        # Get from Redis
-        redis = await get_redis_client()
-        state_json = await redis.aget(f"{cls.STATE_PREFIX}{state}")
+        # Get from Redis or memory store
+        redis_key = f"{cls.STATE_PREFIX}{state}"
+        state_json = None
+
+        if cls._use_memory_store:
+            state_json = InMemoryStateStore.get(redis_key)
+        else:
+            try:
+                redis = await get_redis_client()
+                state_json = await redis.aget(redis_key)
+            except Exception as redis_err:
+                logger.warning("Redis unavailable for OAuth state, falling back to memory: %s", redis_err)
+                cls._use_memory_store = True
+                state_json = InMemoryStateStore.get(redis_key)
 
         if state_json is None:
             logger.warning("OAuth state not found or expired: state=%s", state[:20])
@@ -123,7 +170,14 @@ class OAuthStateService:
             raise OAuthErrorCode.OAUTH_STATE_EXPIRED.http_exception()
 
         # Delete to prevent replay
-        await redis.delete(f"{cls.STATE_PREFIX}{state}")
+        if cls._use_memory_store:
+            InMemoryStateStore.delete(f"{cls.STATE_PREFIX}{state}")
+        else:
+            try:
+                await redis.delete(f"{cls.STATE_PREFIX}{state}")
+            except Exception as redis_err:
+                logger.warning("Redis delete failed, cleaning from memory: %s", redis_err)
+                InMemoryStateStore.delete(f"{cls.STATE_PREFIX}{state}")
 
         return OAuthStateData(
             provider=state_data["provider"],

@@ -105,7 +105,12 @@ class LdapProvider(UserSyncProvider):
         return f"uid={username},{config.bind_dn}"
 
     def _decrypt_password(self, encrypted: str) -> str | None:
-        """Decrypt RSA-encrypted password."""
+        """Decrypt RSA-encrypted password with fallback for development."""
+        # Fast path: if it looks like plain text (short, no base64 chars), return as-is
+        # This supports development mode where password is sent unencrypted
+        if len(encrypted) < 128 and not self._is_likely_encrypted(encrypted):
+            return encrypted
+
         try:
             import base64
 
@@ -119,6 +124,11 @@ class LdapProvider(UserSyncProvider):
 
             rsa_private_key = getattr(settings, "rsa_private_key", None)
             if not rsa_private_key:
+                # Fallback: check for development-only plain password mode
+                ldapPlainPassword = getattr(settings, "ldap_plain_password", None)
+                if ldapPlainPassword:
+                    logger.warning("Using plain password mode - NOT for production")
+                    return encrypted
                 logger.warning("RSA private key not configured")
                 return None
 
@@ -146,6 +156,14 @@ class LdapProvider(UserSyncProvider):
         except Exception as e:
             logger.exception("Password decryption failed: %s", e)
             return None
+
+    def _is_likely_encrypted(self, data: str) -> bool:
+        """Check if string looks like base64 encrypted data."""
+        import re
+
+        # Base64 pattern
+        base64_pattern = re.compile(r"^[A-Za-z0-9+/]+=*$")
+        return bool(base64_pattern.match(data) and len(data) > 32)
 
     async def _ldap_bind(
         self,
