@@ -85,3 +85,8 @@ class UserGroupEmptyError(BaseErrorCode):
 class AdminUserUpdateForbiddenError(BaseErrorCode):
     Code: int = 10640
     Msg: str = 'Administrator user information cannot be modified'
+
+
+class UserTwoFactorVerifyFailedError(BaseErrorCode):
+    Code: int = 10650
+    Msg: str = 'Two-factor verification failed'

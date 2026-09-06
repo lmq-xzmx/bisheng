@@ -159,6 +159,11 @@ export const changeLLmServerStatus = async (model_id: string, online: number) =>
     return await axios.post(`/api/v1/llm/online`, { model_id, online })
 }
 
+// 测试模型连接
+export const testLLmServer = async (model_id: string) => {
+    return await axios.post(`/api/v1/llm/test`, { model_id })
+}
+
 // 获取模型详情
 export const getLLmServerDetail = async (server_id: string): Promise<any> => {
     return await axios.get(`/api/v1/llm/info?server_id=${server_id}`)

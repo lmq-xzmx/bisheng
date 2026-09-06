@@ -14,7 +14,8 @@ import { captureAndAlertRequestErrorHoc } from "../../controllers/request";
 import LoginBridge from './loginBridge';
 import { PWD_RULE, handleEncrypt, handleLdapEncrypt } from './utils';
 import { locationContext } from '@/contexts/locationContext';
-import { ldapLoginApi, getSSOurlApi } from '@/controllers/API/pro';
+import { getSSOurlApi } from '@/controllers/API/pro';
+import { ldapLoginApi } from '@/controllers/API/userSync';
 import { getBrandAssetUrl } from '@/utils/brand';
 import { getWorkspaceClientUrl } from '@/utils/workspaceUrl';
 

@@ -1,0 +1,1 @@
+"""User Sync domain layer."""

@@ -11,7 +11,7 @@ import { generateUUID } from "@/components/bs-ui/utils";
 import ShadTooltip from "@/components/ShadTooltipComponent";
 import { locationContext } from "@/contexts/locationContext";
 import { userContext } from "@/contexts/userContext";
-import { addLLmServer, deleteLLmServer, getLLmServerDetail, updateLLmServer } from "@/controllers/API/finetune";
+import { addLLmServer, deleteLLmServer, getLLmServerDetail, updateLLmServer, testLLmServer } from "@/controllers/API/finetune";
 import { captureAndAlertRequestErrorHoc } from "@/controllers/request";
 import { ArrowLeft, Plus, Settings, Trash2Icon } from "lucide-react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -26,7 +26,7 @@ import { t } from "i18next";
 
 const ROOT_TENANT_ID = 1
 
-function ModelItem({ data, type, onDelete, onInput, onConfig }) {
+function ModelItem({ data, type, onDelete, onInput, onConfig, onTest }) {
     const { t } = useTranslation()
     const [model, setModel] = useState({
         ...data,
@@ -45,6 +45,7 @@ function ModelItem({ data, type, onDelete, onInput, onConfig }) {
     });
     const [originalAdvancedParams, setOriginalAdvancedParams] = useState(advancedParams);
     const [jsonError, setJsonError] = useState(false);
+    const [testing, setTesting] = useState(false);
 
     const prevDepsRef = useRef({
         type: type,
@@ -289,6 +290,23 @@ function ModelItem({ data, type, onDelete, onInput, onConfig }) {
                     onClick={handleDelClick}
                     className="w-[16px] h-[16px] opacity-0 group-hover:opacity-100 cursor-pointer text-gray-500"
                 />
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100"
+                    disabled={testing || !onTest}
+                    onClick={async () => {
+                        if (!onTest) return
+                        setTesting(true)
+                        try {
+                            await onTest(model.id)
+                        } finally {
+                            setTesting(false)
+                        }
+                    }}
+                >
+                    {testing ? t('model.testing', 'Testing...') : t('model.test', 'Test')}
+                </Button>
             </div>
             <div className="space-y-2 mt-2">
                 <div>
@@ -610,6 +628,23 @@ export default function ModelConfig({ id, onGetName, onBack, onReload, onBerforS
         })
     }
 
+    const handleTest = async (model_id: string) => {
+        try {
+            await testLLmServer(model_id)
+            message({
+                variant: 'success',
+                description: t('model.testSuccess', 'Test passed')
+            })
+        } catch (err: any) {
+            const errMsg = err?.response?.data?.detail || err?.message || t('model.testFailed', 'Test failed')
+            message({
+                variant: 'error',
+                description: errMsg
+            })
+            throw err
+        }
+    }
+
     const _modelProvider = useMemo(() => {
         return id === -1 ? modelProvider : [...modelProvider, bishengModelProvider]
     }, [id])
@@ -710,6 +745,7 @@ export default function ModelConfig({ id, onGetName, onBack, onReload, onBerforS
                                     onVoiceChange={(voice) => handleVoiceChange(voice, i)}
                                     onConfig={(config) => handleModelConfig(config, i)}
                                     onDelete={() => handleDelete(i)}
+                                    onTest={handleTest}
                                 />
                             ))
                         }

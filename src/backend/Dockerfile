@@ -8,7 +8,8 @@ RUN uv sync --frozen --no-dev && uv cache clean
 ENV PATH="/app/.venv/bin:$PATH"
 
 # 安装 NLTK 数据（依赖 Python 环境，放在 uv sync 之后）
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('averaged_perceptron_tagger'); nltk.download('averaged_perceptron_tagger_eng')"
+# 失败时继续构建，运行时如需 NLTK 数据会按需下载
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('averaged_perceptron_tagger'); nltk.download('averaged_perceptron_tagger_eng')" || true
 
 COPY ./ ./
 

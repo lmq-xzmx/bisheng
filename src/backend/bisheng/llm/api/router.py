@@ -188,6 +188,15 @@ async def update_model_online(request: Request,
     return resp_200(data=ret)
 
 
+@router.post('/test')
+async def test_model_connection(request: Request,
+                              login_user: UserPayload = Depends(UserPayload.get_tenant_admin_user),
+                              model_id: int = Body(..., embed=True, description="Model UniqueID")):
+    """Test model connection by invoking the model with a test prompt."""
+    await LLMService.test_model_status_by_id(model_id, login_user)
+    return resp_200(data={'status': 'ok'})
+
+
 # --- F022: 5 system-config endpoints with tenant-scoped envelope -----------
 
 
