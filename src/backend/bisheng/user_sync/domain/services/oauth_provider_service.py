@@ -166,20 +166,13 @@ class OAuthProviderService:
         client_id: str,
     ) -> TokenResponse:
         """Generate access and refresh tokens."""
-        from bisheng.user.domain.models.user import UserDao
-        import json
-
-        # Get user info
-        import asyncio
-        user = asyncio.get_event_loop().run_until_complete(UserDao.aget_user(user_id))
-
-        # Create access token
+        # Create access payload
         access_payload = {
             "sub": str(user_id),
             "client_id": client_id,
             "scope": " ".join(scopes),
-            "iat": time.time(),
-            "exp": time.time() + self.ACCESS_TOKEN_TTL,
+            "iat": int(time.time()),
+            "exp": int(time.time() + self.ACCESS_TOKEN_TTL),
             "type": "access",
         }
         access_token = self._encode_jwt(access_payload)
@@ -214,8 +207,8 @@ class OAuthProviderService:
         except jwt.InvalidTokenError:
             return None
 
-    def get_userinfo(self, token: str) -> dict | None:
-        """Get user info for access token."""
+    async def get_userinfo_async(self, token: str) -> dict | None:
+        """Get user info for access token (async version)."""
         claims = self.verify_access_token(token)
         if not claims:
             return None
@@ -225,9 +218,8 @@ class OAuthProviderService:
             return None
 
         from bisheng.user.domain.models.user import UserDao
-        import asyncio
 
-        user = asyncio.get_event_loop().run_until_complete(UserDao.aget_user(user_id))
+        user = await UserDao.aget_user(user_id)
         if not user:
             return None
 
@@ -237,6 +229,11 @@ class OAuthProviderService:
             "email": user.email,
             "phone_number": user.phone_number,
         }
+
+    def get_userinfo(self, token: str) -> dict | None:
+        """Get user info for access token (sync version, uses asyncio.run)."""
+        import asyncio
+        return asyncio.run(self.get_userinfo_async(token))
 
 
 # Global singleton instance
