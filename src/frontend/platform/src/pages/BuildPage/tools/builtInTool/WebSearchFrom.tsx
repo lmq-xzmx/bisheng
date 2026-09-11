@@ -412,6 +412,11 @@ const WebSearchForm = ({ formData, onSubmit, isApi = false }: WebSearchFormProps
                     {renderParams()}
                 </div>
 
+                {/* 诊断与缓存面板 */}
+                <SearchDiagnosticsPanel
+                    searchApiBase={currentToolMap['server_url'] || ''}
+                />
+
                 <DialogFooter>
                     <DialogClose>
                         <Button variant="outline" className="px-11" type="button">
@@ -429,3 +434,195 @@ const WebSearchForm = ({ formData, onSubmit, isApi = false }: WebSearchFormProps
 };
 
 export default WebSearchForm;
+
+// ============================================================================
+// 搜索诊断面板：显示各源状态、清缓存、抓 RSS
+// ============================================================================
+
+import { useCallback, useState } from 'react';
+import { toast } from '@/components/bs-ui/toast/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/bs-ui/card';
+import { Button } from '@/components/bs-ui/button';
+import { Badge } from '@/components/bs-ui/badge';
+import { Progress } from '@/components/bs-ui/progress';
+
+interface SourceStatus {
+    status: 'OK' | 'ERROR' | 'checking' | 'idle';
+    count?: number;
+    size_bytes?: number;
+    error?: string;
+    response?: Record<string, any>;
+}
+
+interface DiagnosticsData {
+    timestamp: string;
+    sources: Record<string, SourceStatus>;
+}
+
+const StatusBadge = ({ s }: { s: SourceStatus }) => {
+    if (s.status === 'checking') return <Badge variant="outline">检查中…</Badge>;
+    if (s.status === 'idle') return <Badge variant="outline">未检测</Badge>;
+    if (s.status === 'ERROR') return <Badge variant="destructive">异常</Badge>;
+    return <Badge variant="secondary">正常</Badge>;
+};
+
+const SourceItem = ({
+    label,
+    source,
+    s,
+    detail,
+}: {
+    label: string;
+    source: string;
+    s: SourceStatus;
+    detail?: string;
+}) => (
+    <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+        <div className="flex flex-col gap-1 min-w-0">
+            <span className="font-medium text-sm truncate">{label}</span>
+            {s.error && (
+                <span className="text-xs text-destructive truncate">{s.error}</span>
+            )}
+            {s.count !== undefined && (
+                <span className="text-xs text-muted-foreground">
+                    返回 {s.count} 条结果
+                </span>
+            )}
+            {s.size_bytes !== undefined && (
+                <span className="text-xs text-muted-foreground">
+                    {s.size_bytes} bytes
+                </span>
+            )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0 ml-4">
+            <StatusBadge s={s} />
+            {detail && <span className="text-xs text-muted-foreground">{detail}</span>}
+        </div>
+    </div>
+);
+
+const SearchDiagnosticsPanel = ({ searchApiBase }: { searchApiBase: string }) => {
+    const [data, setData] = useState<DiagnosticsData | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [meiliStats, setMeiliStats] = useState<Record<string, any> | null>(null);
+    const [rssLoading, setRssLoading] = useState(false);
+
+    const base = searchApiBase?.replace(/\/$/, '');
+
+    const doCheck = useCallback(async () => {
+        if (!base) {
+            toast({ title: '请先保存 SearXNG 服务器地址', variant: 'destructive' });
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await fetch(`${base}/debug/sources`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            setData(json);
+            toast({ title: '检测完成', variant: 'success' });
+        } catch (err: any) {
+            toast({ title: '检测失败', description: err.message, variant: 'destructive' });
+        } finally {
+            setLoading(false);
+        }
+    }, [base]);
+
+    const doMeiliStats = useCallback(async () => {
+        if (!base) return;
+        try {
+            const res = await fetch(`${base}/debug/meilisearch/stats`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            setMeiliStats(json.data || json);
+        } catch {}
+    }, [base]);
+
+    const doClear = useCallback(async () => {
+        if (!base) return;
+        try {
+            const res = await fetch(`${base}/debug/meilisearch/clear`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            toast({ title: '缓存已清空', variant: 'success' });
+            doMeiliStats();
+        } catch (err: any) {
+            toast({ title: '清空失败', description: err.message, variant: 'destructive' });
+        }
+    }, [base, doMeiliStats]);
+
+    const doFinanceRss = useCallback(async () => {
+        if (!base) return;
+        setRssLoading(true);
+        try {
+            const res = await fetch(`${base}/debug/finance/rss`, { method: 'POST' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            toast({
+                title: '财经 RSS 抓取完成',
+                description: `导入了 ${json.imported || 0} 条`,
+                variant: 'success',
+            });
+        } catch (err: any) {
+            toast({ title: '抓取失败', description: err.message, variant: 'destructive' });
+        } finally {
+            setRssLoading(false);
+        }
+    }, [base]);
+
+    const meiliDocCount = meiliStats?.data?.numberOfDocuments || 0;
+
+    return (
+        <div className="rounded-md border p-4 space-y-4">
+            <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">诊断与缓存</span>
+                <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={doCheck} disabled={loading || !base}>
+                        {loading ? '检测中…' : '检测连接'}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={doMeiliStats} disabled={!base}>
+                        缓存状态
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={doClear} disabled={!base}>
+                        清空缓存
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={doFinanceRss} disabled={rssLoading || !base}>
+                        {rssLoading ? '抓取中…' : '抓取财经 RSS'}
+                    </Button>
+                </div>
+            </div>
+
+            {data && (
+                <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground mb-2">
+                        检测时间：{new Date(data.timestamp).toLocaleString()}
+                    </div>
+                    {Object.entries(data.sources).map(([key, s]) => {
+                        const labelMap: Record<string, string> = {
+                            searxng: '网络搜索（SearXNG）',
+                            weibo_hot: '微博热搜',
+                            meilisearch: 'Meilisearch 健康',
+                            finance_rss: '财经 RSS（东方财富）',
+                        };
+                        return (
+                            <SourceItem
+                                key={key}
+                                label={labelMap[key] || key}
+                                source={key}
+                                s={s as SourceStatus}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+
+            {meiliStats && (
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>Meilisearch 文档数：{meiliDocCount}</span>
+                    {meiliStats.status === 'ok' && (
+                        <span>响应：{JSON.stringify(meiliStats.data || meiliStats).slice(0, 60)}</span>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
