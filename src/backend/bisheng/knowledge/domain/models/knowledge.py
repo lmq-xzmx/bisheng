@@ -37,6 +37,18 @@ class KnowledgeState(Enum):
     FAILED = 4  # Status of Documentation Knowledge Base Reconstruction Failure
 
 
+class MigrationStatus(str, Enum):
+    """Embedding model migration status for a knowledge base."""
+
+    IDLE = "idle"  # No migration planned
+    PENDING_DELAYED = "pending_delayed"  # User chose "migrate later"
+    PENDING_IMMEDIATE = "pending_immediate"  # User chose "migrate now"
+    MIGRATING = "migrating"  # Migration in progress
+    COMPLETED = "completed"  # Migration finished successfully
+    LOCKED = "locked"  # Locked at current embedding model
+    FAILED = "failed"  # Migration failed
+
+
 class MetadataFieldType(str, Enum):
     """Metadata field type"""
 
@@ -97,6 +109,37 @@ class KnowledgeBase(SQLModelSerializable):
         default=None,
         sa_column=Column(JsonType, nullable=True),
         description="Metadata Field Configuration for Knowledge Base",
+    )
+    # F050: Embedding model migration fields
+    target_model: str | None = Field(
+        default=None,
+        sa_column=Column(String(length=255), nullable=True),
+        description="Target embedding model ID for migration (null = no migration planned)",
+    )
+    migration_status: MigrationStatus = Field(
+        default=MigrationStatus.IDLE,
+        sa_column=Column(String(length=50), nullable=False, server_default="idle"),
+        description="Embedding model migration status",
+    )
+    migration_progress: float = Field(
+        default=0.0,
+        sa_column=Column(float, nullable=False, server_default="0.0"),
+        description="Migration progress 0.0 ~ 1.0",
+    )
+    locked_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime, nullable=True),
+        description="When the knowledge base was locked at current embedding model",
+    )
+    locked_by: str | None = Field(
+        default=None,
+        sa_column=Column(String(length=255), nullable=True),
+        description="Who locked the knowledge base",
+    )
+    locked_model: str | None = Field(
+        default=None,
+        sa_column=Column(String(length=255), nullable=True),
+        description="The embedding model ID when locked",
     )
     create_time: datetime | None = Field(
         default=None, sa_column=Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))

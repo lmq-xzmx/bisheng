@@ -23,6 +23,8 @@ class ConfigKeyEnum(Enum):
     WORKSTATION_KNOWLEDGE_SPACE = "workstation_knowledge_space"  # Knowledge Space Configuration
 
     LINSIGHT_LLM = "linsight_llm"  # workstation Default Model Configuration
+    EMBEDDING_QUERY_STRATEGY = "embedding_query_strategy"  # F050: Embedding query routing strategy
+    SHOW_EMBEDDING_DETAILS = "show_embedding_details"  # F050: Show embedding details in chat
 
 
 class ConfigBase(SQLModelSerializable):

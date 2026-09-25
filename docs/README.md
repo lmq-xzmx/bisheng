@@ -27,3 +27,9 @@
 | [`observability/`](observability/) | BS_METRIC 指标日志契约(监控团队解析依据) |
 | [`私有化部署/`](私有化部署/) | 部署文档 |
 | [`blog/`](blog/) | 设计科普(如"企业权限体系的前世今生") |
+
+## 知识管理
+
+| 文档 | 内容 |
+|------|------|
+| [`knowledge-sync/`](knowledge-sync/) | Obsidian + BiSheng 整合方案、Multi-repo 管理方式 |

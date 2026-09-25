@@ -11,8 +11,10 @@
 |------|------|------|
 | spec.md | ✅ 已评审 | 2026-09-25 |
 | design.md | ✅ 已评审 | 2026-09-25 |
-| tasks.md | 🔲 草稿 | 拆解完成后改为 ✅ 已拆解 |
-| 实现 | 🔲 未开始 | 0 / N 完成。偏差处理见 design.md 顶部调整原则 |
+| tasks.md | ✅ 已拆解 | 2026-09-25 |
+| Wave 1-6 实现 | ✅ 完成 | T001-T017 完成 |
+| Wave 7 E2E | 🔲 待验证 | 手动验证阶段 |
+| 合并 | 🔲 待合并 | PR 待创建 |
 
 ---
 
@@ -247,4 +249,16 @@ def reciprocal_rank_fusion(results_a: List[RetrievedDoc], results_b: List[Retrie
 > **只留一行指针**，论证在 design.md（决策 / 坑），这里不重复。
 > 推翻已 ★ 确认的决策时，先停下与用户重新确认，再记录。
 
-- 无（初版）
+- T012 Tenant 配置：使用 `ConfigDao.insert_or_update_config` 复用现有配置表，未新建独立配置表
+- 前端组件（MigrationImpact/MigrationPanel/EmbeddingDefaultConfig）：为基础 UI 结构，需集成到现有 ModelPage 页面中
+
+---
+
+## 实施时间线
+
+| 日期 | 完成内容 |
+|------|---------|
+| 2026-09-25 | Wave 1-6 实现完成（T001-T017） |
+| 2026-09-25 | T009 Celery 向量重建逻辑完善 |
+| TBD | Wave 7 E2E 手动验证 |
+| TBD | PR 合并 |

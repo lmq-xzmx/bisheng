@@ -298,3 +298,12 @@ docs-ui-refactor/
 # CoAligne local state + sync config (per-developer; the tool rewrites them itself)
 .coaligne/
 .coaligneignore
+.gstack/
+
+# MBIT requirement docs (local reference, not for sharing)
+MBIT_practice_system/
+
+# Docker skill artifacts (generated locally)
+docker/.agents/
+docker/.claude/
+docker/skills-lock.json

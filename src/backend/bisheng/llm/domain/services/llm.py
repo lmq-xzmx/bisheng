@@ -583,13 +583,11 @@ class LLMService:
         models = [LLMModelInfo(**one.model_dump()) for one in models]
         info = LLMServerInfo(**llm.model_dump(), models=models)
 
-        # Only the global super in Root scope is allowed to flip the
-        # share_to_children toggle, so only that caller needs the truthful
-        # FGA-derived value. Everyone else (Child callers, scope=child
-        # super admins, Root-tenant regular users) sees the schema default
-        # ``False`` — they cannot write the field anyway.
-        is_super = operator is not None and await _check_is_global_super(operator.user_id)
-        if llm.tenant_id == ROOT_TENANT_ID and leaf_id == ROOT_TENANT_ID and is_super:
+        # Always hydrate the truthful FGA-derived value for Root-owned servers
+        # so the UI toggle always reflects reality.  The write-path guard in
+        # ``update_llm_server`` already blocks non-super users, so leaking the
+        # value to a regular Root-user is harmless — they cannot flip it.
+        if llm.tenant_id == ROOT_TENANT_ID:
             shared_children = await ResourceShareService.list_sharing_children(
                 "llm_server",
                 str(server_id),
@@ -750,6 +748,19 @@ class LLMService:
         except Exception as e:
             LLMDao.update_model_status(model.id, 1, str(e))
             logger.exception(f"test model status: {model.id} {model.model_name}")
+        else:
+            # Success: update status to 0 and clear remark
+            LLMDao.update_model_status(model.id, 0, '')
+
+    @classmethod
+    async def test_model_status_by_id(cls, model_id: int, login_user: UserPayload):
+        """Test model connection by model_id."""
+        from bisheng.llm.domain.models.llm_server import LLMDao
+        model = await LLMDao.aget_model_by_id(model_id)
+        if not model:
+            from bisheng.common.errcode import NotFoundError
+            raise NotFoundError.http_exception(f"Model {model_id} not found")
+        await cls.test_model_status(model, login_user)
 
     @classmethod
     async def set_default_model(cls, model: LLMModel | LLMModelInfo):
