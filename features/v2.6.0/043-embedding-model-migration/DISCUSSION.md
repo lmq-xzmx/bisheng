@@ -267,9 +267,18 @@ async def _sync_knowledge_embedding_model(
 
 ## 11. 下一步行动
 
-1. 在开发机上按 Wave 1-7 实施
-2. 每个任务完成后进行手动验证
-3. E2E 测试通过后合并
+| 阶段 | 目标 | 依赖 |
+|------|------|------|
+| Wave 1-2 | 数据库迁移 + Domain Service | 无 |
+| Wave 3-4 | Celery 任务 + API 层 | Wave 1-2 |
+| Wave 5-6 | 前端 Platform + Client | Wave 4 |
+| Wave 7 | E2E 手动验证 | Wave 1-6 |
+| 合并 | PR 合并到 main | Wave 7 通过 |
+
+**关键里程碑**（与 `release-contract.md` 对齐）：
+- TBD：代码实现完成
+- TBD：E2E 测试通过
+- TBD：PR 合并
 
 ---
 

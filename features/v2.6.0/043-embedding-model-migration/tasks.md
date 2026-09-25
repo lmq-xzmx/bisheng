@@ -177,6 +177,8 @@ def reciprocal_rank_fusion(results_a: List[RetrievedDoc], results_b: List[Retrie
 - 展示进度条、预估完成时间
 - 操作按钮：「暂停迁移」「强制完成」「锁定当前模型」
 - 锁定状态显示：锁定时间、操作人
+- **进度更新方式**：前端轮询（每 5 秒调用一次 GET API 刷新进度）
+  - 注：本版本不支持 WebSocket 实时推送（见 design.md §8 后续改进）
 **手动验证**:
 - 进入知识库详情页
 - 发起迁移

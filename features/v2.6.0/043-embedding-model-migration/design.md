@@ -240,6 +240,7 @@ def reciprocal_rank_fusion(results_a: List[Doc], results_b: List[Doc], k: int = 
 | 3 | 锁定知识库后，`model` 字段不再跟随系统默认变更 | 解锁后需要同步 `model` 到当前系统默认 | 解锁时检查 `model` 是否落后于系统默认 |
 | 4 | Milvus 向量删除代价高（标记删除更优） | 频繁删除会导致存储碎片和性能下降 | 迁移完成后旧向量标记为 `deleted`，不立即物理删除 |
 | 5 | 迁移任务中断后重启，需要从 `migration_progress` 断点续传 | 重启后从头开始浪费大量时间 | Celery 任务读取 progress 字段决定起始位置 |
+| 6 | Embedding 模型被删除时，如有知识库仍在使用该模型，查询会失败 | 管理员误删模型后终端用户查询报错，体验差 | 删除模型前检查依赖（是否有 KB 的 `model`/`locked_model`/`target_model` 指向它）；或提供替换引导 |
 
 ---
 
