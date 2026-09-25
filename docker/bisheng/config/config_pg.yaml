@@ -1,0 +1,50 @@
+# 数据库配置
+database_url:
+  "postgresql+asyncpg://postgres:postgres123@host.docker.internal:5433/bisheng"
+
+database_pool:
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+  pool_pre_ping: true
+
+redis_url: "redis://default:gAAAAABqbL_Ul8JkNAo05au9u4rhJA6QjksHeEmDJllf1ETGHkjoHZRoSXdaZ5FK4CyOEY0mohbrglR7wAUa7YDuTDIsvI1v9A==@redis:6379/1"
+
+celery_redis_url: "redis://default:gAAAAABqbL_Ul8JkNAo05au9u4rhJA6QjksHeEmDJllf1ETGHkjoHZRoSXdaZ5FK4CyOEY0mohbrglR7wAUa7YDuTDIsvI1v9A==@redis:6379/1"
+
+openfga:
+  enabled: true
+  api_url: "http://openfga:8080"
+
+sso_sync:
+  gateway_hmac_secret: "bisheng-local-hmac-20260422"
+  signature_header: "X-Signature"
+
+vector_stores:
+  milvus:
+    connection_args: '{"host":"milvus","port":"19530","user":"","password":"","secure":false}'
+    is_partition: "true"
+    partition_suffix: "1"
+  elasticsearch:
+    url: "http://elasticsearch:9200"
+    ssl_verify: "{}"
+
+object_storage:
+  type: minio
+  minio:
+    schema: "false"
+    cert_check: "false"
+    endpoint: "minio:9000"
+    sharepoint: "minio:9000"
+    access_key: "minioadmin"
+    secret_key: "minioadmin"
+    public_bucket: "bisheng"
+    tmp_bucket: "tmp-dir"
+
+environment:
+  env: production
+  uns_support: ['png','jpg','jpeg','bmp','doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'md', 'html', 'pdf', 'csv', 'tiff']
+
+logger_conf:
+  level: INFO

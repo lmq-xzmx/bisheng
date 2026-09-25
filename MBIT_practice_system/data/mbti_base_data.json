@@ -1,0 +1,156 @@
+{
+  "mbti_types": [
+    {"code": "INTJ", "name_cn": "建筑师", "e_i": "I", "s_n": "N", "t_f": "T", "j_p": "J", "description": "富有想象力和战略性的思想家"},
+    {"code": "INTP", "name_cn": "逻辑学家", "e_i": "I", "s_n": "N", "t_f": "T", "j_p": "P", "description": "具有创造力的发明家"},
+    {"code": "ENTJ", "name_cn": "指挥官", "e_i": "E", "s_n": "N", "t_f": "T", "j_p": "J", "description": "大胆、富有想象力的领导者"},
+    {"code": "ENTP", "name_cn": "辩论家", "e_i": "E", "s_n": "N", "t_f": "T", "j_p": "P", "description": "聪明好奇的思想者"},
+    {"code": "INFJ", "name_cn": "提倡者", "e_i": "I", "s_n": "N", "t_f": "F", "j_p": "J", "description": "安静而神秘，有着深刻声音"},
+    {"code": "INFP", "name_cn": "调停者", "e_i": "I", "s_n": "N", "t_f": "F", "j_p": "P", "description": "富有诗意的善良人士"},
+    {"code": "ENFJ", "name_cn": "主人公", "e_i": "E", "s_n": "N", "t_f": "F", "j_p": "J", "description": "富有魅力的领导者"},
+    {"code": "ENFP", "name_cn": "竞选者", "e_i": "E", "s_n": "N", "t_f": "F", "j_p": "P", "description": "热情洋溢的创意者"},
+    {"code": "ISTJ", "name_cn": "物流师", "e_i": "I", "s_n": "S", "t_f": "T", "j_p": "J", "description": "务实且注重事实"},
+    {"code": "ISFJ", "name_cn": "守卫者", "e_i": "I", "s_n": "S", "t_f": "F", "j_p": "J", "description": "忠诚且致力于他人福祉"},
+    {"code": "ESTJ", "name_cn": "总经理", "e_i": "E", "s_n": "S", "t_f": "T", "j_p": "J", "description": "出色的管理者"},
+    {"code": "ESFJ", "name_cn": "执政官", "e_i": "E", "s_n": "S", "t_f": "F", "j_p": "J", "description": "极有同理心且受欢迎"},
+    {"code": "ISTP", "name_cn": "鉴赏家", "e_i": "I", "s_n": "S", "t_f": "T", "j_p": "P", "description": "大胆而实用的实验者"},
+    {"code": "ISFP", "name_cn": "探险家", "e_i": "I", "s_n": "S", "t_f": "F", "j_p": "P", "description": "灵活有魅力的艺术家"},
+    {"code": "ESTP", "name_cn": "企业家", "e_i": "E", "s_n": "S", "t_f": "T", "j_p": "P", "description": "聪明精力充沛的观察者"},
+    {"code": "ESFP", "name_cn": "表演者", "e_i": "E", "s_n": "S", "t_f": "F", "j_p": "P", "description": "自发、精力充沛且热情"}
+  ],
+  "functions": [
+    {"code": "Ni", "name_cn": "内倾直觉", "category": "感知", "attitude": "内倾", "description": "关注内心世界的抽象图案和可能性"},
+    {"code": "Ne", "name_cn": "外倾直觉", "category": "感知", "attitude": "外倾", "description": "关注外部世界的多种可能性"},
+    {"code": "Ti", "name_cn": "内倾思考", "category": "判断", "attitude": "内倾", "description": "在内心构建逻辑框架"},
+    {"code": "Te", "name_cn": "外倾思考", "category": "判断", "attitude": "外倾", "description": "组织外部世界，注重效率"},
+    {"code": "Fi", "name_cn": "内倾情感", "category": "判断", "attitude": "内倾", "description": "内心有强烈的价值观体系"},
+    {"code": "Fe", "name_cn": "外倾情感", "category": "判断", "attitude": "外倾", "description": "关注他人情感和外部价值观"},
+    {"code": "Si", "name_cn": "内倾感觉", "category": "感知", "attitude": "内倾", "description": "依赖过去经验，注重细节"},
+    {"code": "Se", "name_cn": "外倾感觉", "category": "感知", "attitude": "外倾", "description": "活在当下，关注即时感官体验"}
+  ],
+  "conflict_types": [
+    {"code": "Te_vs_Fi", "dimension": "判断", "function_a": "Te", "function_b": "Fi", "description": "效率导向 vs 价值导向"},
+    {"code": "Fe_vs_Ti", "dimension": "判断", "function_a": "Fe", "function_b": "Ti", "description": "情感和谐 vs 逻辑精确"},
+    {"code": "Ni_vs_Ne", "dimension": "感知", "function_a": "Ni", "function_b": "Ne", "description": "深度专注 vs 广度发散"},
+    {"code": "Si_vs_Se", "dimension": "感知", "function_a": "Si", "function_b": "Se", "description": "传统经验 vs 即时体验"},
+    {"code": "S_vs_N", "dimension": "感知", "function_a": "S", "function_b": "N", "description": "具体实际 vs 抽象可能"},
+    {"code": "T_vs_F", "dimension": "判断", "function_a": "T", "function_b": "F", "description": "理性逻辑 vs 感性情感"},
+    {"code": "E_vs_I", "dimension": "态度", "function_a": "E", "function_b": "I", "description": "外倾互动 vs 内倾独处"},
+    {"code": "J_vs_P", "dimension": "态度", "function_a": "J", "function_b": "P", "description": "计划判断 vs 知觉灵活"}
+  ],
+  "solutions": [
+    {
+      "conflict_code": "Te_vs_Fi",
+      "situation": "讨论方案/做决定",
+      "problem_a": "直接说'你做错了'，忽略感受",
+      "problem_b": "觉得被针对，情绪化反应",
+      "solution": "先认同对方价值观，再讨论方案",
+      "do_list": ["先肯定对方的核心诉求", "用数据支持你的观点", "承认方案有改进空间", "对事不对人"],
+      "dont_list": ["不要直接否定对方想法", "不要用'你总是''你从不'的句式", "不要在公众场合批评"]
+    },
+    {
+      "conflict_code": "Fe_vs_Ti",
+      "situation": "争论/讨论问题",
+      "problem_a": "把理性讨论当成攻击",
+      "problem_b": "忽视对方情感需求",
+      "solution": "平衡逻辑与情感",
+      "do_list": ["先安抚对方情绪", "承认讨论可能有情绪", "表达关心和支持", "允许暂时搁置争议"],
+      "dont_list": ["不要过于激动", "不要回避问题", "不要人身攻击"]
+    },
+    {
+      "conflict_code": "Ni_vs_Ne",
+      "situation": " brainstorming/讨论",
+      "problem_a": "觉得对方太发散，没有重点",
+      "problem_b": "觉得对方太死板，没有创意",
+      "solution": "尊重两种思维模式",
+      "do_list": ["给Ni时间深入思考", "给Ne空间发散思维", "轮流主导讨论节奏", "最终汇总整合"],
+      "dont_list": ["不要打断对方思路", "不要否定任何一方"]
+    },
+    {
+      "conflict_code": "Si_vs_Se",
+      "situation": "安排活动/解决问题",
+      "problem_a": "担心风险，要万无一失",
+      "problem_b": "想尝试新方式，坐不住",
+      "solution": "平衡稳妥与新鲜",
+      "do_list": ["承认传统经验的价值", "尝试少量新方法", "制定Plan B", "允许小范围试错"],
+      "dont_list": ["不要完全否定对方建议", "不要一次性改变太多"]
+    },
+    {
+      "conflict_code": "S_vs_N",
+      "situation": "日常沟通/讨论方案",
+      "problem_a": "觉得对方太抽象，听不懂",
+      "problem_b": "觉得对方太琐碎，没格局",
+      "solution": "互相靠拢",
+      "do_list": ["S方：请举例说明", "N方：解释抽象概念的实际意义", "S方：分享具体经验", "N方：展示长远影响"],
+      "dont_list": ["不要嘲笑对方的思维模式", "不要认为对方不可理喻"]
+    },
+    {
+      "conflict_code": "T_vs_F",
+      "situation": "给建议/回应批评",
+      "problem_a": "直接指出问题所在",
+      "problem_b": "觉得被冒犯，想太多",
+      "solution": "T方注意方式，F方理性看待",
+      "do_list": ["T方：加情感铺垫再给建议", "F方：相信对方是好意", "T方：承认情感也很重要", "F方：就事论事不扩大化"],
+      "dont_list": ["T方：不要只讲道理", "F方：不要过度敏感"]
+    },
+    {
+      "conflict_code": "E_vs_I",
+      "situation": "社交/沟通",
+      "problem_a": "觉得对方冷漠，不回应",
+      "problem_b": "觉得被逼迫，压力好大",
+      "solution": "尊重各自节奏",
+      "do_list": ["E方：给I方准备时间", "I方：给E方及时回应", "E方：允许退出社交", "I方：适当参与互动"],
+      "dont_list": ["E方：不要强迫I方社交", "I方：不要完全拒绝"]
+    },
+    {
+      "conflict_code": "J_vs_P",
+      "situation": "制定计划/时间管理",
+      "problem_a": "觉得P方太随意，不靠谱",
+      "problem_b": "觉得J方太死板，没自由",
+      "solution": "灵活与计划平衡",
+      "do_list": ["J方：允许适度变化", "P方：守住核心deadline", "J方：接受临时调整", "P方：提前做准备"],
+      "dont_list": ["不要指责对方生活方式"]
+    }
+  ],
+  "pair_suggestions": [
+    {
+      "mbti_a": "INTJ",
+      "mbti_b": "ENTJ",
+      "compatibility": "high",
+      "main_conflict": "Ni-Ni共鸣",
+      "communication_tips": "两位都是战略思考者，沟通高效",
+      "recommended_topics": "战略规划、技术方案、长远目标",
+      "things_to_do": ["直接讨论核心问题", "尊重对方的独立性", "给予思考空间"],
+      "things_to_avoid": ["不要过于情绪化", "不要拐弯抹角"]
+    },
+    {
+      "mbti_a": "INTJ",
+      "mbti_b": "ESFP",
+      "compatibility": "low",
+      "main_conflict": "Ni vs Se 节奏差异",
+      "communication_tips": "需要极大调整才能理解对方",
+      "recommended_topics": "日常生活、实际体验、感官享受",
+      "things_to_do": ["放慢节奏等对方", "多关注当下话题", "给对方表达空间"],
+      "things_to_avoid": ["不要过度抽象", "不要批评对方不够深谋远虑"]
+    },
+    {
+      "mbti_a": "INTP",
+      "mbti_b": "ENFP",
+      "compatibility": "high",
+      "main_conflict": "Ne-Ti 思维共鸣",
+      "communication_tips": "都是创意型，能互相启发",
+      "recommended_topics": "创新想法、可能性探索、哲学讨论",
+      "things_to_do": ["鼓励对方创意", "保持开放讨论", "尊重独立思考"],
+      "things_to_avoid": ["不要过于死板", "不要限制对方想象"]
+    },
+    {
+      "mbti_a": "ENTJ",
+      "mbti_b": "INFP",
+      "compatibility": "medium",
+      "main_conflict": "Te vs Fi 决策冲突",
+      "communication_tips": "效率 vs 价值观，需要平衡",
+      "recommended_topics": "个人价值、兴趣爱好、艺术创作",
+      "things_to_do": ["先认可对方感受", "不要强迫对方接受效率优先", "给对方表达空间"],
+      "things_to_avoid": ["不要忽视对方的情感需求", "不要用命令语气"]
+    }
+  ]
+}
