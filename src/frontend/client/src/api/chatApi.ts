@@ -156,6 +156,14 @@ export interface ChatMessage {
      * legacy fields in `mapAgentResponseItem`.
      */
     events?: AgentEvent[];
+    // F050: Embedding model retrieval details (shown when show_embedding_details is enabled)
+    retrieval_details?: {
+        knowledge_base?: string;
+        doc_count?: number;
+        embedding_model?: string;
+        match_score?: number;
+        routing_strategy?: "new_only" | "old_only" | "dual_rrf";
+    };
 }
 
 export interface ContentPart {

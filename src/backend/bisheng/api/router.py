@@ -34,6 +34,7 @@ from bisheng.knowledge.api.router import (
     knowledge_space_router,
     knowledge_space_tag_library_router,
     knowledge_version_router,
+    migration_router,
     qa_router,
 )
 from bisheng.linsight.api.router import router as linsight_router
@@ -72,6 +73,7 @@ router.include_router(knowledge_router)
 router.include_router(knowledge_space_tag_library_router)
 router.include_router(knowledge_space_router)
 router.include_router(knowledge_version_router)
+router.include_router(migration_router)
 router.include_router(server_router)
 router.include_router(user_router)
 router.include_router(qa_router)
